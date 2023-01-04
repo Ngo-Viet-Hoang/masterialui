@@ -75,6 +75,8 @@ const Authentication = () => {
                             <Typography>User ID: {user.userId}</Typography>
                             <Typography>Email: {user.email}</Typography>
                             <Typography>Phone Number: {user.phoneNumber}</Typography>
+                            <Typography>Password: {user.password}</Typography>
+                            <Typography>ConfirmPassword: {user.confirmPassword}</Typography>
                         </Box>
                     )) :
                     <Typography 
