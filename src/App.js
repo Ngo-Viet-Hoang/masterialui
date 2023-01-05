@@ -1,25 +1,32 @@
-import { Outlet, useLocation } from "react-router";
-import Navbar from "./components/Navbar/Navbar";
-import Grid from "@mui/material/Grid";
-import { useEffect, useState } from "react";
-import Header from "./components/Header/Header";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@mui/material/styles";
+import { dashboardTheme } from "./dashboardTheme";
+import Authentication from "./pages/Authentication/Authentication";
+import Database from "./pages/Database";
+import Function from "./pages/Function";
+import Hosting from "./pages/Hosting";
+import MachineLearning from "./pages/MachineLearning";
+import Storage from "./pages/Storage";
+import Layout from "./components/Layout/Layout";
 
 function App() {
-  const [title, setTitle] = useState(null);
-  const location = useLocation();
-  
-  useEffect(() => {
-    const parsedTitle = location.pathname.replace(/\W/g, ' ');
-    setTitle(parsedTitle);
-  }, [location]);
-
-  return (
-    <Grid container>
-      <Navbar />
-      <Header title={title} />
-      <Outlet />
-    </Grid>
-  );
+  return(
+ <ThemeProvider theme={dashboardTheme}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="layout" element={<Layout />}>
+          <Route path="layout/authentication" element={<Authentication />} />
+          <Route path="layout/database" element={<Database />} />
+          <Route path="layout/functions" element={<Function />} />
+          <Route path="layout/hosting" element={<Hosting />} />
+          <Route path="layout/machine-learning" element={<MachineLearning />} />
+          <Route path="layout/storage" element={<Storage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  </ThemeProvider>
+  )
+ 
 }
 
 export default App;

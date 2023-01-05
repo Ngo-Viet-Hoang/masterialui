@@ -15,6 +15,7 @@ import IconButton from "@mui/material/IconButton";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
+import { FormHelperText } from "@mui/material";
 
 const defaultInputValues = {
   userId: "",
@@ -25,12 +26,11 @@ const defaultInputValues = {
 };
 
 const NewUserModal = ({ open, onClose, addNewUser }) => {
-  const [values, setValues] = useState(defaultInputValues);
-  // tạo const showPassword và đặt cho nó giá trị boolean bằng false 
+  // tạo const showPassword và đặt cho nó giá trị boolean bằng false
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setConfirmShowPassword] = React.useState(false);
 
-  // hàm để khi clich thì ẩn hiện pasword khi là show thì ấn thì ẩn đi password, khi password đang ẩn thì cho hiện ra 
+  // hàm để khi clich thì ẩn hiện pasword khi là show thì ấn thì ẩn đi password, khi password đang ẩn thì cho hiện ra
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleClickShowConfirmPassword = () =>
     setConfirmShowPassword((show) => !show);
@@ -58,117 +58,99 @@ const NewUserModal = ({ open, onClose, addNewUser }) => {
   const regexEmail =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const regexPassword =
-    "^(?=.*[A-Za-z])(?=.*d)(?=.*[@$!%*#?&])[A-Za-zd@$!%*#?&]{8,}$";
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
 
   //---------------------------------------------------------------------------------------------------
 
   // tạo hàm validationSchema nó dùng để chứa tất cả các validation rule (quy tắc xác thực )
   const validationSchema = Yup.object().shape({
     userId: Yup.string()
-      //required bắt buộc bên trong required là thông báo mà mình muốn gửi
       .required("User ID is required")
-      // chứa tối thiểu 6 kí tự
       .min(6, "User ID must be at least 6 characters"),
-    email: Yup.string().matches(regexEmail, "Email is not valid"),
-    // .email đã được tích hợp trong Yup
-
-    // .required('Email is required')
-    // .email('Email is invalid.'),
-    phoneNumber: Yup.string().matches(
+    email: Yup.string()
+      // .matches(regexEmail, "Email is not valid")
+      .required("Email is required")
+      .email("Email is invalid."),
+    phoneNumber: Yup.string()
+    .required('Phone is required ')
+    .matches(
       regexPhoneNumber,
       "Phone number is not valid"
     ),
-    // password: Yup.string()
-    //   .required("Please Enter your password")
-    //   .matches(
-    //     regexPassword,
-    //     "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character"
-    //   ),
+    password: Yup.string()
+      .required("Please Enter your password")
+      .matches(
+        regexPassword,
+        "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character"
+      ),
     confirmPassword: Yup.string()
       .required("ConfirmPassword is required")
       .oneOf([Yup.ref("password"), null], "Passwords must match"),
-    //    password: Yup.string().required('Password is required'),
-    // passwordConfirmation: Yup.string()
-    //    .oneOf([Yup.ref('password'), null], 'Passwords must match')
   });
-//------------------------------------------------
+  //------------------------------------------------
 
-// sử dụng react hook form dùng để hủy cấu trúc 
-// register cho phép đăng ký và nhập dữ liệu 
-// submit là chức năng nhận dữ liệu của biểu mẫu nếu xác nhận giá trị của biểu mẫu thành công 
-// formState là đối tượng chứa thông tin về trạng thái 
+  // sử dụng react hook form dùng để hủy cấu trúc
+  // register cho phép đăng ký và nhập dữ liệu
+  // submit là chức năng nhận dữ liệu của biểu mẫu nếu xác nhận giá trị của biểu mẫu thành công
+  // formState là đối tượng chứa thông tin về trạng thái
   const {
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
+    watch,
+    setValue
   } = useForm({
     resolver: yupResolver(validationSchema),
+    defaultValues: defaultInputValues
   });
+  // getValues chỉ xét giá trị 1 lần không quan sát dc sự thay đổi 
+  // watch quan sát được sự thay đổi của giá trị 
+  //  register dc dùng thay id , name, handlechange cần truyền key vào register nó là 1 dạng nhận dữ liệu 
 
   const addUser = (data) => {
     addNewUser(data);
+    setValue('email', '');
+    setValue('password', '');
+    setValue('userId', '');
+    setValue('confirmPassword', '');
+    setValue('phoneNumber', '');
   };
+  // add value xong thì cho sét giá trị form về giá trị ''
 
-  const handleChange = (value) => {
-    setValues(value);
-  };
-
-  useEffect(() => {
-    if (open) setValues(defaultInputValues);
-  }, [open]);
 
   const getContent = () => (
     <Box sx={modalStyles.inputFields}>
       <TextField
         placeholder="User ID"
-        name="userId"
         label="User ID"
-        required
         {...register("userId")}
-        //để thông báo lỗi hiện viền đỏ
-        error={errors.userId ? true : false}
-        //hiện ra văn bản thông báo lỗi helperText
+        error={errors.userId?.message.length > 0}
         helperText={errors.userId?.message}
-        value={values.userId}
-        onChange={(event) =>
-          handleChange({ ...values, userId: event.target.value })
-        }
+        value={watch('userId')}
       />
       <TextField
         placeholder="Email"
-        name="email"
         label="Email"
-        required
         {...register("email")}
-        error={errors.email ? true : false}
+        error={errors.email?.message.length > 0}
         helperText={errors.email?.message}
-        value={values.email}
-        onChange={(event) =>
-          handleChange({ ...values, email: event.target.value })
-        }
+        value={watch('email')}
+
       />
       <TextField
         placeholder="Phone number"
-        name="phoneNumber"
         label="Phone number"
-        required
         {...register("phoneNumber")}
-        error={errors.phoneNumber ? true : false}
+        error={errors.phoneNumber?.message.length > 0}
         helperText={errors.phoneNumber?.message}
-        value={values.phoneNumber}
-        onChange={(event) =>
-          handleChange({ ...values, phoneNumber: event.target.value })
-        }
+        value={watch('phoneNumber')}
+
       />
       <FormControl sx={modalStyles.inputFields}>
         <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
         <OutlinedInput
-          id="password"
-          name="password"
-          // toán tử ba ngôi nếu điều kiện 1(trước dấu ?) là đúng thì toán tử sẽ trả về giá trị của điều kiện 1 còn nếu là sai thì nó trả về giá trị của value 2
-          // type nếu mà showpassword nếu là định dang text thì trả về text không thì trả về dạng password 
           type={showPassword ? "text" : "password"}
-          // visibility và VisibilityOff là biểu tượng icon 
           endAdornment={
             <InputAdornment position="end">
               <IconButton
@@ -182,24 +164,17 @@ const NewUserModal = ({ open, onClose, addNewUser }) => {
             </InputAdornment>
           }
           label="Password"
-          required
           {...register("password")}
-          error={errors.password ? true : false}
-          helperText={errors.password?.message}
-          value={values.password}
-          onChange={(event) =>
-            handleChange({ ...values, password: event.target.value })
-          }
+          error={errors.password?.message?.length > 0}
+        value={watch('password')}
         />
+        <FormHelperText error={errors.password?.message?.length > 0} >{errors.password?.message}</FormHelperText>
       </FormControl>
       <FormControl sx={modalStyles.inputFields}>
         <InputLabel htmlFor="outlined-adornment-confirmPassword">
           Confirm Password
         </InputLabel>
         <OutlinedInput
-          id="confirmPassword"
-          name="confirmPassword"
-          required
           type={showConfirmPassword ? "text" : "password"}
           endAdornment={
             <InputAdornment position="end">
@@ -213,15 +188,13 @@ const NewUserModal = ({ open, onClose, addNewUser }) => {
               </IconButton>
             </InputAdornment>
           }
-          label="ConfirmPassword"
+          label="Confirm Password"
           {...register("confirmPassword")}
-          error={errors.confirmPassword ? true : false}
+          error={errors.confirmPassword?.message?.length > 0}
           helperText={errors.confirmPassword?.message}
-          value={values.confirmPassword}
-          onChange={(event) =>
-            handleChange({ ...values, confirmPassword: event.target.value })
-          }
+          value={watch('confirmPassword')}
         />
+        <FormHelperText error={errors.confirmPassword?.message?.length > 0} >{errors.confirmPassword?.message}</FormHelperText>
       </FormControl>
     </Box>
   );
