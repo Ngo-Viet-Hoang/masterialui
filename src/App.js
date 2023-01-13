@@ -14,13 +14,13 @@ function App() {
  <ThemeProvider theme={dashboardTheme}>
     <BrowserRouter>
       <Routes>
-        <Route path="layout" element={<Layout />}>
-          <Route path="layout/authentication" element={<Authentication />} />
-          <Route path="layout/database" element={<Database />} />
-          <Route path="layout/functions" element={<Function />} />
-          <Route path="layout/hosting" element={<Hosting />} />
-          <Route path="layout/machine-learning" element={<MachineLearning />} />
-          <Route path="layout/storage" element={<Storage />} />
+        <Route path="/" element={<Layout />}>
+          <Route path="authentication" element={<Authentication />} />
+          <Route path="database" element={<Database />} />
+          <Route path="functions" element={<Function />} />
+          <Route path="hosting" element={<Hosting />} />
+          <Route path="machine-learning" element={<MachineLearning />} />
+          <Route path="storage" element={<Storage />} />
         </Route>
       </Routes>
     </BrowserRouter>
